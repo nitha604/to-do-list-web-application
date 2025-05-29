@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pastel To-Do App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background: #fff0f5;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .todo-container {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #fef6fb;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(240, 180, 220, 0.3);
+    }
+    .form-control, .form-select {
+      border-radius: 20px;
+      border: 1px solid #f3cce7;
+    }
+    .btn-pastel {
+      background-color: #ffd1dc;
+      border: none;
+      border-radius: 30px;
+    }
+    .btn-pastel:hover {
+      background-color: #ffb6c1;
+    }
+    .task {
+      background-color: #ffe4e1;
+      padding: 1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .task.completed {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .task input[type="text"] {
+      border: none;
+      background: transparent;
+      width: 100%;
+    }
+    .datetime {
+      font-size: 0.85rem;
+      color: #7b4a6b;
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h3 class="text-center mb-4"> To-Do App</h3>
+    <form id="taskForm" class="row g-2">
+      <div class="col-6">
+        <input type="text" id="taskInput" class="form-control" placeholder="New task..." required />
+      </div>
+      <div class="col-3">
+        <input type="datetime-local" id="datetimeInput" class="form-control" />
+      </div>
+      <div class="col-3 d-grid">
+        <button class="btn btn-pastel" type="submit">Add</button>
+      </div>
+    </form>
+    <div id="taskList" class="mt-4"></div>
+  </div>
+
+  <script>
+    const taskForm = document.getElementById('taskForm');
+    const taskInput = document.getElementById('taskInput');
+    const datetimeInput = document.getElementById('datetimeInput');
+    const taskList = document.getElementById('taskList');
+
+    let tasks = [];
+
+    taskForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = taskInput.value.trim();
+      const dateTime = datetimeInput.value;
+      if (title !== '') {
+        tasks.push({ title, dateTime, completed: false });
+        renderTasks();
+        taskForm.reset();
+      }
+    });
+
+    function renderTasks() {
+      taskList.innerHTML = '';
+      tasks.forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task' + (task.completed ? ' completed' : '');
+
+        const leftDiv = document.createElement('div');
+        const taskTitle = document.createElement('input');
+        taskTitle.type = 'text';
+        taskTitle.value = task.title;
+        taskTitle.disabled = true;
+
+        const dateTime = document.createElement('div');
+        dateTime.className = 'datetime';
+        if (task.dateTime) {
+          const formatted = new Date(task.dateTime).toLocaleString();
+          dateTime.textContent = formatted;
+        }
+
+        leftDiv.appendChild(taskTitle);
+        leftDiv.appendChild(dateTime);
+
+        const btnGroup = document.createElement('div');
+
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'btn btn-sm btn-pastel me-1';
+        toggleBtn.textContent = task.completed ? 'Undo' : 'Done';
+        toggleBtn.onclick = () => {
+          task.completed = !task.completed;
+          renderTasks();
+        };
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-sm btn-pastel me-1';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => {
+          if (taskTitle.disabled) {
+            taskTitle.disabled = false;
+            taskTitle.focus();
+            editBtn.textContent = 'Save';
+          } else {
+            task.title = taskTitle.value.trim();
+            taskTitle.disabled = true;
+            editBtn.textContent = 'Edit';
+            renderTasks();
+          }
+        };
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-sm btn-pastel';
+        deleteBtn.textContent = '🗑';
+        deleteBtn.onclick = () => {
+          tasks.splice(index, 1);
+          renderTasks();
+        };
+
+        btnGroup.appendChild(toggleBtn);
+        btnGroup.appendChild(editBtn);
+        btnGroup.appendChild(deleteBtn);
+
+        taskDiv.appendChild(leftDiv);
+        taskDiv.appendChild(btnGroup);
+
+        taskList.appendChild(taskDiv);
+      });
+    }
+
+    renderTasks(); // Initial render
+  </script>
+</body>
+</html>
